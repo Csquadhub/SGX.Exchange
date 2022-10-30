@@ -2,19 +2,19 @@
 
 pragma solidity 0.6.12;
 
-import "./interfaces/IUSDG.sol";
+import "./interfaces/ISGUSD.sol";
 import "./YieldToken.sol";
 
-contract USDG is YieldToken, IUSDG {
+contract SGUSD is YieldToken, ISGUSD {
 
     mapping (address => bool) public vaults;
 
     modifier onlyVault() {
-        require(vaults[msg.sender], "USDG: forbidden");
+        require(vaults[msg.sender], "SGUSD: forbidden");
         _;
     }
 
-    constructor(address _vault) public YieldToken("USD Gambit", "USDG", 0) {
+    constructor(address _vault) public YieldToken("SGX USD Coin", "SGUSD", 0) {
         vaults[_vault] = true;
     }
 

@@ -128,7 +128,7 @@ contract RewardRouter is ReentrancyGuard, Governable {
     function mintAndStakeSgxLp(
         address _token,
         uint256 _amount,
-        uint256 _minUsdg,
+        uint256 _minSgusd,
         uint256 _minSgxLp
     ) external nonReentrant returns (uint256) {
         require(_amount > 0, "RewardRouter: invalid _amount");
@@ -139,7 +139,7 @@ contract RewardRouter is ReentrancyGuard, Governable {
             account,
             _token,
             _amount,
-            _minUsdg,
+            _minSgusd,
             _minSgxLp
         );
         IRewardTracker(feeSgxLpTracker).stakeForAccount(
@@ -160,7 +160,7 @@ contract RewardRouter is ReentrancyGuard, Governable {
         return sgxlpAmount;
     }
 
-    function mintAndStakeSgxLpETH(uint256 _minUsdg, uint256 _minSgxLp)
+    function mintAndStakeSgxLpETH(uint256 _minSgusd, uint256 _minSgxLp)
         external
         payable
         nonReentrant
@@ -177,7 +177,7 @@ contract RewardRouter is ReentrancyGuard, Governable {
             account,
             weth,
             msg.value,
-            _minUsdg,
+            _minSgusd,
             _minSgxLp
         );
 

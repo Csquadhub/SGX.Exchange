@@ -1,7 +1,7 @@
 const { deployContract, contractAt, sendTxn } = require("../shared/helpers")
 const { expandDecimals } = require("../../test/shared/utilities")
 
-async function readVaultTokenInfo(vault, tokens, usdgAmount) {
+async function readVaultTokenInfo(vault, tokens, sgusdAmount) {
   console.log("vault.priceFeed", await vault.priceFeed())
 
   const priceFeed = await contractAt("VaultPriceFeed", await vault.priceFeed())
@@ -10,8 +10,8 @@ async function readVaultTokenInfo(vault, tokens, usdgAmount) {
     const token = tokens[i]
     console.log("vault.poolAmounts", (await vault.poolAmounts(token)).toString())
     console.log("vault.reservedAmounts", (await vault.reservedAmounts(token)).toString())
-    console.log("vault.usdgAmounts", (await vault.usdgAmounts(token)).toString())
-    console.log("vault.getRedemptionAmount", (await vault.getRedemptionAmount(token, usdgAmount)).toString())
+    console.log("vault.sgusdAmounts", (await vault.sgusdAmounts(token)).toString())
+    console.log("vault.getRedemptionAmount", (await vault.getRedemptionAmount(token, sgusdAmount)).toString())
     console.log("vault.getMinPrice", (await vault.getMinPrice(token)).toString())
     console.log("vault.getMaxPrice", (await vault.getMaxPrice(token)).toString())
     console.log("vault.guaranteedUsd", (await vault.guaranteedUsd(token)).toString())
@@ -30,12 +30,12 @@ async function readFees(vault, weth, usdc) {
   console.log("result[1]", result[1].toString())
   console.log("result[2]", result[2].toString())
 
-  const ethTargetAmount = await vault.getTargetUsdgAmount(weth.address);
-  const usdcTargetAmount = await vault.getTargetUsdgAmount(usdc.address);
+  const ethTargetAmount = await vault.getTargetSgusdAmount(weth.address);
+  const usdcTargetAmount = await vault.getTargetSgusdAmount(usdc.address);
   console.log("ethTargetAmount", ethTargetAmount.toString())
   console.log("usdcTargetAmount", usdcTargetAmount.toString())
 
-  const initialAmount0 = await vault.usdgAmounts(usdc.address)
+  const initialAmount0 = await vault.sgusdAmounts(usdc.address)
   console.log("initialAmount0", initialAmount0.toString())
 
   const feeBasisPoints0 = await vault.getFeeBasisPoints(usdc.address, expandDecimals(10, 18), 20, 20, true)
@@ -78,7 +78,7 @@ async function main() {
   // const usdc = { address: "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8" }
   // const sgx = { address: "0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a" }
   // const tokens = ["0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"]
-  // const usdgAmount = expandDecimals(1, 18)
+  // const sgusdAmount = expandDecimals(1, 18)
   // const sgxlpManager = await contractAt("SgxLpManager", "0x91425Ac4431d068980d497924DD540Ae274f3270")
 
   // await readSgxLpManager(sgxlpManager)

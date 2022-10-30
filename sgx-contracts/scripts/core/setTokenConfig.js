@@ -51,18 +51,18 @@ async function main() {
 
   const shouldSendTxn = true
 
-  let totalUsdgAmount = bigNumberify(0)
+  let totalSgusdAmount = bigNumberify(0)
 
   for (const [i, tokenItem] of tokenArr.entries()) {
     const token = {}
     token.poolAmount = vaultTokenInfo[i * vaultPropsLength]
     token.reservedAmount = vaultTokenInfo[i * vaultPropsLength + 1]
     token.availableAmount = token.poolAmount.sub(token.reservedAmount)
-    token.usdgAmount = vaultTokenInfo[i * vaultPropsLength + 2]
+    token.sgusdAmount = vaultTokenInfo[i * vaultPropsLength + 2]
     token.redemptionAmount = vaultTokenInfo[i * vaultPropsLength + 3]
     token.weight = vaultTokenInfo[i * vaultPropsLength + 4]
     token.bufferAmount = vaultTokenInfo[i * vaultPropsLength + 5]
-    token.maxUsdgAmount = vaultTokenInfo[i * vaultPropsLength + 6]
+    token.maxSgusdAmount = vaultTokenInfo[i * vaultPropsLength + 6]
     token.globalShortSize = vaultTokenInfo[i * vaultPropsLength + 7]
     token.maxGlobalShortSize = vaultTokenInfo[i * vaultPropsLength + 8]
     token.minPrice = vaultTokenInfo[i * vaultPropsLength + 9]
@@ -82,12 +82,12 @@ async function main() {
       .mul(expandDecimals(1, tokenItem.decimals))
       .div(token.minPrice);
 
-    let usdgAmount = token.managedUsd.div(expandDecimals(1, 30 - 18))
-    totalUsdgAmount = totalUsdgAmount.add(usdgAmount)
+    let sgusdAmount = token.managedUsd.div(expandDecimals(1, 30 - 18))
+    totalSgusdAmount = totalSgusdAmount.add(sgusdAmount)
 
-    const adjustedMaxUsdgAmount = expandDecimals(tokenItem.maxUsdgAmount, 18)
-    // if (usdgAmount.gt(adjustedMaxUsdgAmount)) {
-    //   usdgAmount = adjustedMaxUsdgAmount
+    const adjustedMaxSgusdAmount = expandDecimals(tokenItem.maxSgusdAmount, 18)
+    // if (sgusdAmount.gt(adjustedMaxSgusdAmount)) {
+    //   sgusdAmount = adjustedMaxSgusdAmount
     // }
 
     if (shouldSendTxn) {
@@ -96,14 +96,14 @@ async function main() {
         tokenItem.address, // _token
         tokenItem.tokenWeight, // _tokenWeight
         tokenItem.minProfitBps, // _minProfitBps
-        expandDecimals(tokenItem.maxUsdgAmount, 18), // _maxUsdgAmount
+        expandDecimals(tokenItem.maxSgusdAmount, 18), // _maxSgusdAmount
         expandDecimals(tokenItem.bufferAmount, tokenItem.decimals), // _bufferAmount
-        usdgAmount
+        sgusdAmount
       ), `vault.setTokenConfig(${tokenItem.name}) ${tokenItem.address}`)
     }
   }
 
-  console.log("totalUsdgAmount", totalUsdgAmount.toString())
+  console.log("totalSgusdAmount", totalSgusdAmount.toString())
 }
 
 main()

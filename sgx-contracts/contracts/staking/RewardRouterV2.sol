@@ -125,11 +125,11 @@ contract RewardRouterV2 is ReentrancyGuard, Governable {
         _unstakeSgx(msg.sender, esSgx, _amount, true);
     }
 
-    function mintAndStakeSgxLp(address _token, uint256 _amount, uint256 _minUsdg, uint256 _minSgxLp) external nonReentrant returns (uint256) {
+    function mintAndStakeSgxLp(address _token, uint256 _amount, uint256 _minSgusd, uint256 _minSgxLp) external nonReentrant returns (uint256) {
         require(_amount > 0, "RewardRouter: invalid _amount");
 
         address account = msg.sender;
-        uint256 sgxlpAmount = ISgxLpManager(sgxlpManager).addLiquidityForAccount(account, account, _token, _amount, _minUsdg, _minSgxLp);
+        uint256 sgxlpAmount = ISgxLpManager(sgxlpManager).addLiquidityForAccount(account, account, _token, _amount, _minSgusd, _minSgxLp);
         IRewardTracker(feeSgxLpTracker).stakeForAccount(account, account, sgxlp, sgxlpAmount);
         IRewardTracker(stakedSgxLpTracker).stakeForAccount(account, account, feeSgxLpTracker, sgxlpAmount);
 
@@ -138,14 +138,14 @@ contract RewardRouterV2 is ReentrancyGuard, Governable {
         return sgxlpAmount;
     }
 
-    function mintAndStakeSgxLpETH(uint256 _minUsdg, uint256 _minSgxLp) external payable nonReentrant returns (uint256) {
+    function mintAndStakeSgxLpETH(uint256 _minSgusd, uint256 _minSgxLp) external payable nonReentrant returns (uint256) {
         require(msg.value > 0, "RewardRouter: invalid msg.value");
 
         IWETH(weth).deposit{value: msg.value}();
         IERC20(weth).approve(sgxlpManager, msg.value);
 
         address account = msg.sender;
-        uint256 sgxlpAmount = ISgxLpManager(sgxlpManager).addLiquidityForAccount(address(this), account, weth, msg.value, _minUsdg, _minSgxLp);
+        uint256 sgxlpAmount = ISgxLpManager(sgxlpManager).addLiquidityForAccount(address(this), account, weth, msg.value, _minSgusd, _minSgxLp);
 
         IRewardTracker(feeSgxLpTracker).stakeForAccount(account, account, sgxlp, sgxlpAmount);
         IRewardTracker(stakedSgxLpTracker).stakeForAccount(account, account, feeSgxLpTracker, sgxlpAmount);

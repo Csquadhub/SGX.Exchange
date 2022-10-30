@@ -17,7 +17,7 @@ describe("PositionManager", function () {
   let vaultUtils
   let vaultPriceFeed
   let positionManager
-  let usdg
+  let sgusd
   let router
   let bnb
   let bnbPriceFeed
@@ -45,21 +45,21 @@ describe("PositionManager", function () {
 
     vault = await deployContract("Vault", [])
     await vault.setIsLeverageEnabled(false)
-    usdg = await deployContract("USDG", [vault.address])
-    router = await deployContract("Router", [vault.address, usdg.address, bnb.address])
+    sgusd = await deployContract("SGUSD", [vault.address])
+    router = await deployContract("Router", [vault.address, sgusd.address, bnb.address])
     vaultPriceFeed = await deployContract("VaultPriceFeed", [])
 
-    const initVaultResult = await initVault(vault, router, usdg, vaultPriceFeed)
+    const initVaultResult = await initVault(vault, router, sgusd, vaultPriceFeed)
     vaultUtils = initVaultResult.vaultUtils
 
     distributor0 = await deployContract("TimeDistributor", [])
-    yieldTracker0 = await deployContract("YieldTracker", [usdg.address])
+    yieldTracker0 = await deployContract("YieldTracker", [sgusd.address])
 
     await yieldTracker0.setDistributor(distributor0.address)
     await distributor0.setDistribution([yieldTracker0.address], [1000], [bnb.address])
 
     await bnb.mint(distributor0.address, 5000)
-    await usdg.setYieldTrackers([yieldTracker0.address])
+    await sgusd.setYieldTrackers([yieldTracker0.address])
 
     await vaultPriceFeed.setTokenConfig(bnb.address, bnbPriceFeed.address, 8, false)
     await vaultPriceFeed.setTokenConfig(btc.address, btcPriceFeed.address, 8, false)
@@ -71,7 +71,7 @@ describe("PositionManager", function () {
       router.address,
       vault.address,
       bnb.address,
-      usdg.address,
+      sgusd.address,
       minExecutionFee,
       expandDecimals(5, 30) // minPurchseTokenAmountUsd
     );
@@ -79,7 +79,7 @@ describe("PositionManager", function () {
     await router.connect(user0).approvePlugin(orderBook.address)
 
     sgxlp = await deployContract("SGXLP", [])
-    sgxlpManager = await deployContract("SgxLpManager", [vault.address, usdg.address, sgxlp.address, 24 * 60 * 60])
+    sgxlpManager = await deployContract("SgxLpManager", [vault.address, sgusd.address, sgxlp.address, 24 * 60 * 60])
 
     positionManager = await deployContract("PositionManager", [vault.address, router.address, bnb.address, 50, orderBook.address])
 
@@ -94,15 +94,15 @@ describe("PositionManager", function () {
 
     await bnb.mint(user1.address, expandDecimals(1000, 18))
     await bnb.connect(user1).approve(router.address, expandDecimals(1000, 18))
-    await router.connect(user1).swap([bnb.address, usdg.address], expandDecimals(1000, 18), expandDecimals(29000, 18), user1.address)
+    await router.connect(user1).swap([bnb.address, sgusd.address], expandDecimals(1000, 18), expandDecimals(29000, 18), user1.address)
 
     await dai.mint(user1.address, expandDecimals(30000, 18))
     await dai.connect(user1).approve(router.address, expandDecimals(30000, 18))
-    await router.connect(user1).swap([dai.address, usdg.address], expandDecimals(30000, 18), expandDecimals(29000, 18), user1.address)
+    await router.connect(user1).swap([dai.address, sgusd.address], expandDecimals(30000, 18), expandDecimals(29000, 18), user1.address)
 
     await btc.mint(user1.address, expandDecimals(10, 8))
     await btc.connect(user1).approve(router.address, expandDecimals(10, 8))
-    await router.connect(user1).swap([btc.address, usdg.address], expandDecimals(10, 8), expandDecimals(59000, 18), user1.address)
+    await router.connect(user1).swap([btc.address, sgusd.address], expandDecimals(10, 8), expandDecimals(59000, 18), user1.address)
 
     deployTimelock = async () => {
       return await deployContract("Timelock", [

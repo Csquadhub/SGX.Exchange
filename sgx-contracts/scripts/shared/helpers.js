@@ -4,24 +4,24 @@ const parse = require('csv-parse')
 
 const network = (process.env.HARDHAT_NETWORK || 'mainnet');
 
-const ARBITRUM = 42161
-const AVALANCHE = 43114
+const BSC = 56
+const BSC_TESTNET = 97
 
 const {
-  ARBITRUM_URL,
-  AVAX_URL,
-  ARBITRUM_DEPLOY_KEY,
-  AVAX_DEPLOY_KEY
+  BSC_URL,
+  BSC_TESTNET_URL,
+  BSC_DEPLOY_KEY,
+  BSC_TESTNET_DEPLOY_KEY
 } = require("../../env.json")
 
 const providers = {
-  arbitrum: new ethers.providers.JsonRpcProvider(ARBITRUM_URL),
-  avax: new ethers.providers.JsonRpcProvider(AVAX_URL)
+  bsc: new ethers.providers.JsonRpcProvider(BSC_URL),
+  bsc_testnet: new ethers.providers.JsonRpcProvider(BSC_TESTNET_URL)
 }
 
 const signers = {
-  arbitrum: new ethers.Wallet(ARBITRUM_DEPLOY_KEY).connect(providers.arbitrum),
-  avax: new ethers.Wallet(ARBITRUM_DEPLOY_KEY).connect(providers.avax)
+  bsc: new ethers.Wallet(BSC_DEPLOY_KEY).connect(providers.bsc),
+  bsc_testnet: new ethers.Wallet(BSC_TESTNET_DEPLOY_KEY).connect(providers.bsc_testnet)
 }
 
 const readCsv = async (file) => {
@@ -39,12 +39,12 @@ const readCsv = async (file) => {
 }
 
 function getChainId(network) {
-  if (network === "arbitrum") {
-    return 42161
+  if (network === "bsc") {
+    return 56
   }
 
   if (network === "avax") {
-    return 43114
+    return 97
   }
 
   throw new Error("Unsupported network")
@@ -156,8 +156,8 @@ async function processBatch(batchLists, batchSize, handler) {
 }
 
 module.exports = {
-  ARBITRUM,
-  AVALANCHE,
+  BSC,
+  BSC_TESTNET,
   providers,
   signers,
   readCsv,

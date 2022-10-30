@@ -51,13 +51,39 @@ async function deployOnAvax() {
   await sendTxn(timelock.setContractHandler(positionRouter.address, true), "timelock.setContractHandler(positionRouter)")
 }
 
+async function deployOnBscTestnet() {
+  // const signer = await getFrameSigner()
+
+  const vault = await contractAt("Vault", "0xEFF4b7FdC9ee22387a6183B814f2467007C065b2")
+  const timelock = await contractAt("Timelock", await vault.gov())
+  const router = await contractAt("Router", "0x558C53E9C3d83cFdB8eb50D55EB2370cdA10A7b9")
+  const weth = await contractAt("WETH", "0x612777Eea37a44F7a95E3B101C39e1E2695fa6C2")
+  const referralStorage = await contractAt("ReferralStorage", "0xC0541e344460e4226b622eFF3CB6418F4bD0e775")
+  const depositFee = "30" // 0.3%
+  const minExecutionFee = "17000000000000000" // 0.017 BNB
+
+  const positionRouter = await deployContract("PositionRouter", [vault.address, router.address, weth.address, depositFee, minExecutionFee])
+  // const positionRouter = await contractAt("PositionRouter", "0xc5BBc613f4617eE4F7E89320081182024F86bd6B")
+
+  await sendTxn(positionRouter.setReferralStorage(referralStorage.address), "positionRouter.setReferralStorage")
+  await sendTxn(referralStorage.setHandler(positionRouter.address, true), "referralStorage.setHandler(positionRouter)")
+
+  await sendTxn(router.addPlugin(positionRouter.address), "router.addPlugin")
+
+  await sendTxn(positionRouter.setDelayValues(1, 180, 30 * 60), "positionRouter.setDelayValues")
+  await sendTxn(timelock.setContractHandler(positionRouter.address, true), "timelock.setContractHandler(positionRouter)")
+}
+
 async function main() {
   if (network === "avax") {
     await deployOnAvax()
     return
   }
-
-  await deployOnArb()
+  if (network === "arbitrum") {
+    await deployOnArb()
+    return
+  }
+  await deployOnBscTestnet()
 }
 
 main()

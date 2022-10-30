@@ -12,17 +12,15 @@ body,
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-  "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-  sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: subpixel-antialiased;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-  monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 * {
@@ -123,6 +121,10 @@ tr {
   padding: 0;
 }
 
+tbody tr {
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
 td {
   margin: 0;
   padding: 0;
@@ -199,8 +201,8 @@ a.plain {
 }
 
 .default-btn {
-  background: #F04D36;
-  border-radius: 4px;
+  background: linear-gradient(to right, rgba(255, 136, 0), rgba(255, 57, 36));
+  border-radius: 1rem;
   font-size: 1.4rem;
   line-height: 2rem;
   font-weight: normal;
@@ -234,7 +236,7 @@ a.plain {
 } */
 
 .default-btn:active {
-  background: #F04D36;
+  background: #f04d36;
   border: none;
   padding-left: 1.6rem;
   padding-right: 1.6rem;

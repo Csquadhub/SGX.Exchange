@@ -19,6 +19,13 @@ async function getAvaxValues() {
   return { positionRouter, positionManager }
 }
 
+async function getBscTestnetValues() {
+  const positionRouter = await contractAt("PositionRouter", "0x5Fb6a4B08E893E56640971f2646Bc7f2E5fB42DA")
+  const positionManager = await contractAt("PositionManager", "0x0639859E49D8Fe28447cc47F4F286Eb47462fc34")
+
+  return { positionRouter, positionManager }
+}
+
 async function getValues() {
   if (network === "arbitrum") {
     return getArbValues()
@@ -26,6 +33,10 @@ async function getValues() {
 
   if (network === "avax") {
     return getAvaxValues()
+  }
+
+  if (network === "testnet") {
+    return getBscTestnetValues()
   }
 }
 
@@ -35,9 +46,9 @@ async function main() {
   const referralStorage = await contractAt("ReferralStorage", await positionRouter.referralStorage())
 
   // await sendTxn(positionRouter.setReferralStorage(referralStorage.address), "positionRouter.setReferralStorage")
-  // await sendTxn(positionManager.setReferralStorage(referralStorage.address), "positionManager.setReferralStorage")
+  await sendTxn(positionManager.setReferralStorage(referralStorage.address), "positionManager.setReferralStorage")
 
-  await sendTxn(referralStorage.setHandler(positionRouter.address, true), "referralStorage.setHandler(positionRouter)")
+  // await sendTxn(referralStorage.setHandler(positionRouter.address, true), "referralStorage.setHandler(positionRouter)")
 }
 
 main()

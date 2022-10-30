@@ -12,6 +12,7 @@ import cx from "classnames";
 import {Trans} from "@lingui/macro";
 import NetworkDropdown from "../NetworkDropdown/NetworkDropdown";
 import LanguagePopupHome from "../NetworkDropdown/LanguagePopupHome";
+import tradeImg from "../../img/ic_trade.svg";
 
 type Props = {
   openSettings: () => void;
@@ -85,6 +86,8 @@ export function AppHeaderUser({
               redirectPopupTimestamp={redirectPopupTimestamp}
               showRedirectModal={showRedirectModal}
           >
+            {/* {small ? "" : <><img className="btn-image" src={tradeImg} alt="" />&nbsp;&nbsp;</>} */}
+            <img className="btn-image" src={tradeImg} alt="" />&nbsp;&nbsp;
             <Trans>Trade</Trans>
           </HeaderLink>
         </div>

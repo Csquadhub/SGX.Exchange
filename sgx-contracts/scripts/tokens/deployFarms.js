@@ -2,22 +2,22 @@ const { deployContract, contractAt, sendTxn } = require("../shared/helpers")
 const { expandDecimals } = require("../../test/shared/utilities")
 
 async function main() {
-  const usdg = await contractAt("USDG", "0x85E76cbf4893c1fbcB34dCF1239A91CE2A4CF5a7")
+  const sgusd = await contractAt("SGUSD", "0x85E76cbf4893c1fbcB34dCF1239A91CE2A4CF5a7")
   const wbnb = await contractAt("WETH", "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c")
   const xgmt = await contractAt("YieldToken", "0xe304ff0983922787Fd84BC9170CD21bF78B16B10")
 
-  const gmtUsdgPair = { address: "0xa41e57459f09a126F358E118b693789d088eA8A0" }
-  const gmtUsdgFarm = await deployContract("YieldFarm", ["GMT-USDG Farm", "GMT-USDG:FARM", gmtUsdgPair.address], "gmtUsdgFarm")
+  const gmtSgusdPair = { address: "0xa41e57459f09a126F358E118b693789d088eA8A0" }
+  const gmtSgusdFarm = await deployContract("YieldFarm", ["GMT-SGUSD Farm", "GMT-SGUSD:FARM", gmtSgusdPair.address], "gmtSgusdFarm")
 
-  const xgmtUsdgPair = { address: "0x0b622208fc0691C2486A3AE6B7C875b4A174b317" }
-  const xgmtUsdgFarm = await deployContract("YieldFarm", ["xGMT-USDG Farm", "xGMT-USDG:FARM", xgmtUsdgPair.address], "xgmtUsdgFarm")
+  const xgmtSgusdPair = { address: "0x0b622208fc0691C2486A3AE6B7C875b4A174b317" }
+  const xgmtSgusdFarm = await deployContract("YieldFarm", ["xGMT-SGUSD Farm", "xGMT-SGUSD:FARM", xgmtSgusdPair.address], "xgmtSgusdFarm")
 
-  const usdgYieldTracker = await deployContract("YieldTracker", [usdg.address], "usdgYieldTracker")
-  const usdgRewardDistributor = await deployContract("TimeDistributor", [], "usdgRewardDistributor")
+  const sgusdYieldTracker = await deployContract("YieldTracker", [sgusd.address], "sgusdYieldTracker")
+  const sgusdRewardDistributor = await deployContract("TimeDistributor", [], "sgusdRewardDistributor")
 
-  await sendTxn(usdg.setYieldTrackers([usdgYieldTracker.address]), "usdg.setYieldTrackers")
-  await sendTxn(usdgYieldTracker.setDistributor(usdgRewardDistributor.address), "usdgYieldTracker.setDistributor")
-  await sendTxn(usdgRewardDistributor.setDistribution([usdgYieldTracker.address], ["0"], [wbnb.address]), "usdgRewardDistributor.setDistribution")
+  await sendTxn(sgusd.setYieldTrackers([sgusdYieldTracker.address]), "sgusd.setYieldTrackers")
+  await sendTxn(sgusdYieldTracker.setDistributor(sgusdRewardDistributor.address), "sgusdYieldTracker.setDistributor")
+  await sendTxn(sgusdRewardDistributor.setDistribution([sgusdYieldTracker.address], ["0"], [wbnb.address]), "sgusdRewardDistributor.setDistribution")
 
   const xgmtYieldTracker = await deployContract("YieldTracker", [xgmt.address], "xgmtYieldTracker")
   const xgmtRewardDistributor = await deployContract("TimeDistributor", [], "xgmtRewardDistributor")
@@ -26,33 +26,33 @@ async function main() {
   await sendTxn(xgmtYieldTracker.setDistributor(xgmtRewardDistributor.address), "xgmtYieldTracker.setDistributor")
   await sendTxn(xgmtRewardDistributor.setDistribution([xgmtYieldTracker.address], ["0"], [wbnb.address]), "xgmtRewardDistributor.setDistribution")
 
-  const gmtUsdgFarmYieldTrackerXgmt = await deployContract("YieldTracker", [gmtUsdgFarm.address], "gmtUsdgFarmYieldTrackerXgmt")
-  const gmtUsdgFarmDistributorXgmt = await deployContract("TimeDistributor", [], "gmtUsdgFarmDistributorXgmt")
+  const gmtSgusdFarmYieldTrackerXgmt = await deployContract("YieldTracker", [gmtSgusdFarm.address], "gmtSgusdFarmYieldTrackerXgmt")
+  const gmtSgusdFarmDistributorXgmt = await deployContract("TimeDistributor", [], "gmtSgusdFarmDistributorXgmt")
 
-  await sendTxn(gmtUsdgFarmYieldTrackerXgmt.setDistributor(gmtUsdgFarmDistributorXgmt.address), "gmtUsdgFarmYieldTrackerXgmt.setDistributor")
-  await sendTxn(gmtUsdgFarmDistributorXgmt.setDistribution([gmtUsdgFarmYieldTrackerXgmt.address], ["0"], [xgmt.address]), "gmtUsdgFarmDistributorXgmt.setDistribution")
+  await sendTxn(gmtSgusdFarmYieldTrackerXgmt.setDistributor(gmtSgusdFarmDistributorXgmt.address), "gmtSgusdFarmYieldTrackerXgmt.setDistributor")
+  await sendTxn(gmtSgusdFarmDistributorXgmt.setDistribution([gmtSgusdFarmYieldTrackerXgmt.address], ["0"], [xgmt.address]), "gmtSgusdFarmDistributorXgmt.setDistribution")
 
-  const gmtUsdgFarmYieldTrackerWbnb = await deployContract("YieldTracker", [gmtUsdgFarm.address], "gmtUsdgFarmYieldTrackerWbnb")
-  const gmtUsdgFarmDistributorWbnb = await deployContract("TimeDistributor", [], "gmtUsdgFarmDistributorWbnb")
+  const gmtSgusdFarmYieldTrackerWbnb = await deployContract("YieldTracker", [gmtSgusdFarm.address], "gmtSgusdFarmYieldTrackerWbnb")
+  const gmtSgusdFarmDistributorWbnb = await deployContract("TimeDistributor", [], "gmtSgusdFarmDistributorWbnb")
 
-  await sendTxn(gmtUsdgFarmYieldTrackerWbnb.setDistributor(gmtUsdgFarmDistributorWbnb.address), "gmtUsdgFarmYieldTrackerWbnb.setDistributor")
-  await sendTxn(gmtUsdgFarmDistributorWbnb.setDistribution([gmtUsdgFarmYieldTrackerWbnb.address], ["0"], [wbnb.address]), "gmtUsdgFarmDistributorWbnb.setDistribution")
+  await sendTxn(gmtSgusdFarmYieldTrackerWbnb.setDistributor(gmtSgusdFarmDistributorWbnb.address), "gmtSgusdFarmYieldTrackerWbnb.setDistributor")
+  await sendTxn(gmtSgusdFarmDistributorWbnb.setDistribution([gmtSgusdFarmYieldTrackerWbnb.address], ["0"], [wbnb.address]), "gmtSgusdFarmDistributorWbnb.setDistribution")
 
-  await sendTxn(gmtUsdgFarm.setYieldTrackers([gmtUsdgFarmYieldTrackerXgmt.address, gmtUsdgFarmYieldTrackerWbnb.address]), "gmtUsdgFarm.setYieldTrackers")
+  await sendTxn(gmtSgusdFarm.setYieldTrackers([gmtSgusdFarmYieldTrackerXgmt.address, gmtSgusdFarmYieldTrackerWbnb.address]), "gmtSgusdFarm.setYieldTrackers")
 
-  const xgmtUsdgFarmYieldTrackerXgmt = await deployContract("YieldTracker", [xgmtUsdgFarm.address], "xgmtUsdgFarmYieldTrackerXgmt")
-  const xgmtUsdgFarmDistributorXgmt = await deployContract("TimeDistributor", [], "xgmtUsdgFarmDistributorXgmt")
+  const xgmtSgusdFarmYieldTrackerXgmt = await deployContract("YieldTracker", [xgmtSgusdFarm.address], "xgmtSgusdFarmYieldTrackerXgmt")
+  const xgmtSgusdFarmDistributorXgmt = await deployContract("TimeDistributor", [], "xgmtSgusdFarmDistributorXgmt")
 
-  await sendTxn(xgmtUsdgFarmYieldTrackerXgmt.setDistributor(xgmtUsdgFarmDistributorXgmt.address), "xgmtUsdgFarmYieldTrackerXgmt.setDistributor")
-  await sendTxn(xgmtUsdgFarmDistributorXgmt.setDistribution([xgmtUsdgFarmYieldTrackerXgmt.address], ["0"], [xgmt.address]), "xgmtUsdgFarmDistributorXgmt.setDistribution")
+  await sendTxn(xgmtSgusdFarmYieldTrackerXgmt.setDistributor(xgmtSgusdFarmDistributorXgmt.address), "xgmtSgusdFarmYieldTrackerXgmt.setDistributor")
+  await sendTxn(xgmtSgusdFarmDistributorXgmt.setDistribution([xgmtSgusdFarmYieldTrackerXgmt.address], ["0"], [xgmt.address]), "xgmtSgusdFarmDistributorXgmt.setDistribution")
 
-  const xgmtUsdgFarmYieldTrackerWbnb = await deployContract("YieldTracker", [xgmtUsdgFarm.address], "xgmtUsdgFarmYieldTrackerWbnb")
-  const xgmtUsdgFarmDistributorWbnb = await deployContract("TimeDistributor", [], "xgmtUsdgFarmDistributorWbnb")
+  const xgmtSgusdFarmYieldTrackerWbnb = await deployContract("YieldTracker", [xgmtSgusdFarm.address], "xgmtSgusdFarmYieldTrackerWbnb")
+  const xgmtSgusdFarmDistributorWbnb = await deployContract("TimeDistributor", [], "xgmtSgusdFarmDistributorWbnb")
 
-  await sendTxn(xgmtUsdgFarmYieldTrackerWbnb.setDistributor(xgmtUsdgFarmDistributorWbnb.address), "xgmtUsdgFarmYieldTrackerWbnb.setDistributor")
-  await sendTxn(xgmtUsdgFarmDistributorWbnb.setDistribution([xgmtUsdgFarmYieldTrackerWbnb.address], ["0"], [wbnb.address]), "gmtUsdgFarmDistributorWbnb.setDistribution")
+  await sendTxn(xgmtSgusdFarmYieldTrackerWbnb.setDistributor(xgmtSgusdFarmDistributorWbnb.address), "xgmtSgusdFarmYieldTrackerWbnb.setDistributor")
+  await sendTxn(xgmtSgusdFarmDistributorWbnb.setDistribution([xgmtSgusdFarmYieldTrackerWbnb.address], ["0"], [wbnb.address]), "gmtSgusdFarmDistributorWbnb.setDistribution")
 
-  await sendTxn(xgmtUsdgFarm.setYieldTrackers([xgmtUsdgFarmYieldTrackerXgmt.address, xgmtUsdgFarmYieldTrackerWbnb.address]), "xgmtUsdgFarm.setYieldTrackers")
+  await sendTxn(xgmtSgusdFarm.setYieldTrackers([xgmtSgusdFarmYieldTrackerXgmt.address, xgmtSgusdFarmYieldTrackerWbnb.address]), "xgmtSgusdFarm.setYieldTrackers")
 }
 
 main()

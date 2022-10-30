@@ -16,7 +16,7 @@ describe("PositionRouter", function () {
   const minExecutionFee = 4000
   let vault
   let timelock
-  let usdg
+  let sgusd
   let router
   let positionRouter
   let referralStorage
@@ -66,24 +66,24 @@ describe("PositionRouter", function () {
       500, // maxMarginFeeBasisPoints 5%
     ])
 
-    usdg = await deployContract("USDG", [vault.address])
-    router = await deployContract("Router", [vault.address, usdg.address, bnb.address])
+    sgusd = await deployContract("SGUSD", [vault.address])
+    router = await deployContract("Router", [vault.address, sgusd.address, bnb.address])
     positionRouter = await deployContract("PositionRouter", [vault.address, router.address, bnb.address, depositFee, minExecutionFee])
     referralStorage = await deployContract("ReferralStorage", [])
     vaultPriceFeed = await deployContract("VaultPriceFeed", [])
     await positionRouter.setReferralStorage(referralStorage.address)
     await referralStorage.setHandler(positionRouter.address, true)
 
-    await initVault(vault, router, usdg, vaultPriceFeed)
+    await initVault(vault, router, sgusd, vaultPriceFeed)
 
     distributor0 = await deployContract("TimeDistributor", [])
-    yieldTracker0 = await deployContract("YieldTracker", [usdg.address])
+    yieldTracker0 = await deployContract("YieldTracker", [sgusd.address])
 
     await yieldTracker0.setDistributor(distributor0.address)
     await distributor0.setDistribution([yieldTracker0.address], [1000], [bnb.address])
 
     await bnb.mint(distributor0.address, 5000)
-    await usdg.setYieldTrackers([yieldTracker0.address])
+    await sgusd.setYieldTrackers([yieldTracker0.address])
 
     reader = await deployContract("Reader", [])
 
@@ -207,7 +207,7 @@ describe("PositionRouter", function () {
   it("withdrawFees", async () => {
     await positionRouter.setDelayValues(0, 300, 500)
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -377,7 +377,7 @@ describe("PositionRouter", function () {
   it("increasePosition acceptablePrice long", async () => {
     await positionRouter.setDelayValues(0, 300, 500)
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -412,7 +412,7 @@ describe("PositionRouter", function () {
   it("increasePosition minOut long", async () => {
     await positionRouter.setDelayValues(0, 300, 500)
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -447,7 +447,7 @@ describe("PositionRouter", function () {
   it("validateExecution", async () => {
     await positionRouter.setDelayValues(5, 300, 500)
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -523,7 +523,7 @@ describe("PositionRouter", function () {
   it("validateCancellation", async () => {
     await positionRouter.setDelayValues(5, 300, 500)
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -606,7 +606,7 @@ describe("PositionRouter", function () {
   it("maxGlobalLongSize", async () => {
     await positionRouter.setDelayValues(0, 300, 500)
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
     await positionRouter.setMaxGlobalSizes(
@@ -655,7 +655,7 @@ describe("PositionRouter", function () {
   it("decreasePosition acceptablePrice long", async () => {
     await positionRouter.setDelayValues(0, 300, 500)
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -705,7 +705,7 @@ describe("PositionRouter", function () {
   it("decreasePosition minOut long", async () => {
     await positionRouter.setDelayValues(0, 300, 500)
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -755,7 +755,7 @@ describe("PositionRouter", function () {
   it("increasePosition acceptablePrice short", async () => {
     await positionRouter.setDelayValues(0, 300, 500)
     await dai.mint(vault.address, expandDecimals(8000, 18))
-    await vault.buyUSDG(dai.address, user1.address)
+    await vault.buySGUSD(dai.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -790,7 +790,7 @@ describe("PositionRouter", function () {
   it("maxGlobalShortSize", async () => {
     await positionRouter.setDelayValues(0, 300, 500)
     await dai.mint(vault.address, expandDecimals(8000, 18))
-    await vault.buyUSDG(dai.address, user1.address)
+    await vault.buySGUSD(dai.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -841,7 +841,7 @@ describe("PositionRouter", function () {
   it("decreasePosition acceptablePrice short", async () => {
     await positionRouter.setDelayValues(0, 300, 500)
     await dai.mint(vault.address, expandDecimals(8000, 18))
-    await vault.buyUSDG(dai.address, user1.address)
+    await vault.buySGUSD(dai.address, user1.address)
     await timelock.setContractHandler(positionRouter.address, true)
     await timelock.setShouldToggleIsLeverageEnabled(true)
 
@@ -1026,7 +1026,7 @@ describe("PositionRouter", function () {
       .to.be.revertedWith("Vault: poolAmount exceeded")
 
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
 
     await expect(positionRouter.connect(positionKeeper).executeIncreasePosition(key, executionFeeReceiver.address))
       .to.be.revertedWith("Timelock: forbidden")
@@ -1141,7 +1141,7 @@ describe("PositionRouter", function () {
     await mineBlock(provider)
 
     await dai.mint(vault.address, expandDecimals(7000, 18))
-    await vault.buyUSDG(dai.address, user1.address)
+    await vault.buySGUSD(dai.address, user1.address)
 
     const tx4 = await positionRouter.connect(positionKeeper).executeIncreasePosition(key, executionFeeReceiver.address)
     await reportGasUsed(provider, tx4, "executeIncreasePosition gas used")
@@ -1281,7 +1281,7 @@ describe("PositionRouter", function () {
       .to.be.revertedWith("Vault: poolAmount exceeded")
 
     await dai.mint(vault.address, expandDecimals(7000, 18))
-    await vault.buyUSDG(dai.address, user1.address)
+    await vault.buySGUSD(dai.address, user1.address)
 
     await expect(positionRouter.connect(positionKeeper).executeIncreasePosition(key, executionFeeReceiver.address))
       .to.be.revertedWith("Timelock: forbidden")
@@ -1403,7 +1403,7 @@ describe("PositionRouter", function () {
     await mineBlock(provider)
 
     await bnb.mint(vault.address, expandDecimals(25, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
 
     const tx4 = await positionRouter.connect(positionKeeper).executeIncreasePosition(key, executionFeeReceiver.address)
     await reportGasUsed(provider, tx4, "executeIncreasePosition gas used")
@@ -1525,7 +1525,7 @@ describe("PositionRouter", function () {
     await mineBlock(provider)
 
     await bnb.mint(vault.address, expandDecimals(30, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
 
     await timelock.setContractHandler(positionRouter.address, true)
 
@@ -1791,7 +1791,7 @@ describe("PositionRouter", function () {
     await bnb.mint(user0.address, expandDecimals(2, 18))
     await bnb.connect(user0).approve(router.address, expandDecimals(2, 18))
     await dai.mint(vault.address, expandDecimals(10000, 18))
-    await vault.buyUSDG(dai.address, user1.address)
+    await vault.buySGUSD(dai.address, user1.address)
 
     await positionRouter.connect(user0).createIncreasePosition(...increasePositionParams.concat([4000, referralCode]), { value: 4000 })
     key = await positionRouter.getRequestKey(user0.address, 2)
@@ -1844,7 +1844,7 @@ describe("PositionRouter", function () {
     const executionFeeReceiver = newWallet()
 
     await bnb.mint(vault.address, expandDecimals(500, 18))
-    await vault.buyUSDG(bnb.address, user1.address)
+    await vault.buySGUSD(bnb.address, user1.address)
 
     await router.addPlugin(positionRouter.address)
     await router.connect(user0).approvePlugin(positionRouter.address)

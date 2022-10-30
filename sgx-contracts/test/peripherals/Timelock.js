@@ -18,7 +18,7 @@ describe("Timelock", function () {
   let sgxlp
   let vaultUtils
   let vaultPriceFeed
-  let usdg
+  let sgusd
   let router
   let bnb
   let bnbPriceFeed
@@ -43,24 +43,24 @@ describe("Timelock", function () {
     daiPriceFeed = await deployContract("PriceFeed", [])
 
     vault = await deployContract("Vault", [])
-    usdg = await deployContract("USDG", [vault.address])
-    router = await deployContract("Router", [vault.address, usdg.address, bnb.address])
+    sgusd = await deployContract("SGUSD", [vault.address])
+    router = await deployContract("Router", [vault.address, sgusd.address, bnb.address])
     vaultPriceFeed = await deployContract("VaultPriceFeed", [])
 
     sgxlp = await deployContract("SGXLP", [])
-    sgxlpManager = await deployContract("SgxLpManager", [vault.address, usdg.address, sgxlp.address, 24 * 60 * 60])
+    sgxlpManager = await deployContract("SgxLpManager", [vault.address, sgusd.address, sgxlp.address, 24 * 60 * 60])
 
-    const initVaultResult = await initVault(vault, router, usdg, vaultPriceFeed)
+    const initVaultResult = await initVault(vault, router, sgusd, vaultPriceFeed)
     vaultUtils = initVaultResult.vaultUtils
 
     distributor0 = await deployContract("TimeDistributor", [])
-    yieldTracker0 = await deployContract("YieldTracker", [usdg.address])
+    yieldTracker0 = await deployContract("YieldTracker", [sgusd.address])
 
     await yieldTracker0.setDistributor(distributor0.address)
     await distributor0.setDistribution([yieldTracker0.address], [1000], [bnb.address])
 
     await bnb.mint(distributor0.address, 5000)
-    await usdg.setYieldTrackers([yieldTracker0.address])
+    await sgusd.setYieldTrackers([yieldTracker0.address])
 
     await vault.setPriceFeed(user3.address)
 
@@ -97,14 +97,14 @@ describe("Timelock", function () {
   })
 
   it("inits", async () => {
-    expect(await usdg.gov()).eq(wallet.address)
-    expect(await usdg.vaults(vault.address)).eq(true)
-    expect(await usdg.vaults(user0.address)).eq(false)
+    expect(await sgusd.gov()).eq(wallet.address)
+    expect(await sgusd.vaults(vault.address)).eq(true)
+    expect(await sgusd.vaults(user0.address)).eq(false)
 
     expect(await vault.gov()).eq(timelock.address)
     expect(await vault.isInitialized()).eq(true)
     expect(await vault.router()).eq(router.address)
-    expect(await vault.usdg()).eq(usdg.address)
+    expect(await vault.sgusd()).eq(sgusd.address)
     expect(await vault.liquidationFeeUsd()).eq(toUsd(5))
     expect(await vault.fundingRateFactor()).eq(600)
 
@@ -159,7 +159,7 @@ describe("Timelock", function () {
       12, // _tokenDecimals
       7000, // _tokenWeight
       300, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       false, // _isStable
       true // isShortable
     )
@@ -173,7 +173,7 @@ describe("Timelock", function () {
       12, // _tokenDecimals
       7000, // _tokenWeight
       300, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       false, // _isStable
       true // isShortable
     )
@@ -184,7 +184,7 @@ describe("Timelock", function () {
     expect(await vault.tokenDecimals(bnb.address)).eq(12)
     expect(await vault.tokenWeights(bnb.address)).eq(7000)
     expect(await vault.minProfitBasisPoints(bnb.address)).eq(300)
-    expect(await vault.maxUsdgAmounts(bnb.address)).eq(5000)
+    expect(await vault.maxSgusdAmounts(bnb.address)).eq(5000)
     expect(await vault.stableTokens(bnb.address)).eq(false)
     expect(await vault.shortableTokens(bnb.address)).eq(true)
 
@@ -193,9 +193,9 @@ describe("Timelock", function () {
       bnb.address,
       100, // _tokenWeight
       200, // _minProfitBps
-      1000, // _maxUsdgAmount
+      1000, // _maxSgusdAmount
       300, // _bufferAmount
-      500 // _usdgAmount
+      500 // _sgusdAmount
     )
 
     expect(await vault.whitelistedTokenCount()).eq(1)
@@ -204,11 +204,11 @@ describe("Timelock", function () {
     expect(await vault.tokenDecimals(bnb.address)).eq(12)
     expect(await vault.tokenWeights(bnb.address)).eq(100)
     expect(await vault.minProfitBasisPoints(bnb.address)).eq(200)
-    expect(await vault.maxUsdgAmounts(bnb.address)).eq(1000)
+    expect(await vault.maxSgusdAmounts(bnb.address)).eq(1000)
     expect(await vault.stableTokens(bnb.address)).eq(false)
     expect(await vault.shortableTokens(bnb.address)).eq(true)
     expect(await vault.bufferAmounts(bnb.address)).eq(300)
-    expect(await vault.usdgAmounts(bnb.address)).eq(500)
+    expect(await vault.sgusdAmounts(bnb.address)).eq(500)
 
     await timelock.setContractHandler(user0.address, true)
 
@@ -217,51 +217,51 @@ describe("Timelock", function () {
       bnb.address,
       100, // _tokenWeight
       50, // _minProfitBps
-      1000, // _maxUsdgAmount
+      1000, // _maxSgusdAmount
       300, // _bufferAmount
-      500 // _usdgAmount
+      500 // _sgusdAmount
     )
 
     expect(await vault.minProfitBasisPoints(bnb.address)).eq(50)
   })
 
-  it("setUsdgAmounts", async () => {
-    expect(await vault.usdgAmounts(bnb.address)).eq(0)
-    expect(await vault.usdgAmounts(dai.address)).eq(0)
+  it("setSgusdAmounts", async () => {
+    expect(await vault.sgusdAmounts(bnb.address)).eq(0)
+    expect(await vault.sgusdAmounts(dai.address)).eq(0)
 
-    await expect(timelock.connect(user0).setUsdgAmounts(vault.address, [bnb.address, dai.address], [500, 250]))
+    await expect(timelock.connect(user0).setSgusdAmounts(vault.address, [bnb.address, dai.address], [500, 250]))
       .to.be.revertedWith("Timelock: forbidden")
 
-    await timelock.connect(wallet).setUsdgAmounts(vault.address, [bnb.address, dai.address], [500, 250])
+    await timelock.connect(wallet).setSgusdAmounts(vault.address, [bnb.address, dai.address], [500, 250])
 
-    expect(await vault.usdgAmounts(bnb.address)).eq(500)
-    expect(await vault.usdgAmounts(dai.address)).eq(250)
+    expect(await vault.sgusdAmounts(bnb.address)).eq(500)
+    expect(await vault.sgusdAmounts(dai.address)).eq(250)
   })
 
-  it("updateUsdgSupply", async () => {
-    await usdg.addVault(wallet.address)
-    await usdg.mint(sgxlpManager.address, 1000)
+  it("updateSgusdSupply", async () => {
+    await sgusd.addVault(wallet.address)
+    await sgusd.mint(sgxlpManager.address, 1000)
 
-    expect(await usdg.balanceOf(sgxlpManager.address)).eq(1000)
-    expect(await usdg.totalSupply()).eq(1000)
+    expect(await sgusd.balanceOf(sgxlpManager.address)).eq(1000)
+    expect(await sgusd.totalSupply()).eq(1000)
 
-    await expect(timelock.connect(user0).updateUsdgSupply(500))
+    await expect(timelock.connect(user0).updateSgusdSupply(500))
       .to.be.revertedWith("Timelock: forbidden")
 
-    await expect(timelock.updateUsdgSupply(500))
+    await expect(timelock.updateSgusdSupply(500))
       .to.be.revertedWith("YieldToken: forbidden")
 
-    await usdg.setGov(timelock.address)
+    await sgusd.setGov(timelock.address)
 
-    await timelock.updateUsdgSupply(500)
+    await timelock.updateSgusdSupply(500)
 
-    expect(await usdg.balanceOf(sgxlpManager.address)).eq(500)
-    expect(await usdg.totalSupply()).eq(500)
+    expect(await sgusd.balanceOf(sgxlpManager.address)).eq(500)
+    expect(await sgusd.totalSupply()).eq(500)
 
-    await timelock.updateUsdgSupply(2000)
+    await timelock.updateSgusdSupply(2000)
 
-    expect(await usdg.balanceOf(sgxlpManager.address)).eq(2000)
-    expect(await usdg.totalSupply()).eq(2000)
+    expect(await sgusd.balanceOf(sgxlpManager.address)).eq(2000)
+    expect(await sgusd.totalSupply()).eq(2000)
   })
 
   it("setBuffer", async () => {
@@ -801,7 +801,7 @@ describe("Timelock", function () {
       12, // _tokenDecimals
       7000, // _tokenWeight
       120, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       true, // _isStable
       false // isShortable
     )).to.be.revertedWith("Timelock: forbidden")
@@ -812,7 +812,7 @@ describe("Timelock", function () {
       12, // _tokenDecimals
       7000, // _tokenWeight
       120, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       true, // _isStable
       false // isShortable
     )).to.be.revertedWith("Timelock: action not signalled")
@@ -823,7 +823,7 @@ describe("Timelock", function () {
       12, // _tokenDecimals
       7000, // _tokenWeight
       120, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       true, // _isStable
       false // isShortable
     )).to.be.revertedWith("Timelock: forbidden")
@@ -834,7 +834,7 @@ describe("Timelock", function () {
       12, // _tokenDecimals
       7000, // _tokenWeight
       120, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       true, // _isStable
       false // isShortable
     )
@@ -845,7 +845,7 @@ describe("Timelock", function () {
       12, // _tokenDecimals
       7000, // _tokenWeight
       120, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       true, // _isStable
       false // isShortable
     )).to.be.revertedWith("Timelock: action time not yet passed")
@@ -859,7 +859,7 @@ describe("Timelock", function () {
       12, // _tokenDecimals
       7000, // _tokenWeight
       120, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       true, // _isStable
       false // isShortable
     )).to.be.revertedWith("Timelock: action time not yet passed")
@@ -873,7 +873,7 @@ describe("Timelock", function () {
       15, // _tokenDecimals
       7000, // _tokenWeight
       120, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       true, // _isStable
       false // isShortable
     )).to.be.revertedWith("Timelock: action not signalled")
@@ -883,7 +883,7 @@ describe("Timelock", function () {
     expect(await vault.tokenDecimals(dai.address)).eq(0)
     expect(await vault.tokenWeights(dai.address)).eq(0)
     expect(await vault.minProfitBasisPoints(dai.address)).eq(0)
-    expect(await vault.maxUsdgAmounts(dai.address)).eq(0)
+    expect(await vault.maxSgusdAmounts(dai.address)).eq(0)
     expect(await vault.stableTokens(dai.address)).eq(false)
     expect(await vault.shortableTokens(dai.address)).eq(false)
 
@@ -893,7 +893,7 @@ describe("Timelock", function () {
       12, // _tokenDecimals
       7000, // _tokenWeight
       120, // _minProfitBps
-      5000, // _maxUsdgAmount
+      5000, // _maxSgusdAmount
       true, // _isStable
       false // isShortable
     )
@@ -903,7 +903,7 @@ describe("Timelock", function () {
     expect(await vault.tokenDecimals(dai.address)).eq(12)
     expect(await vault.tokenWeights(dai.address)).eq(7000)
     expect(await vault.minProfitBasisPoints(dai.address)).eq(120)
-    expect(await vault.maxUsdgAmounts(dai.address)).eq(5000)
+    expect(await vault.maxSgusdAmounts(dai.address)).eq(5000)
     expect(await vault.stableTokens(dai.address)).eq(true)
     expect(await vault.shortableTokens(dai.address)).eq(false)
   })
@@ -1233,32 +1233,32 @@ describe("Timelock", function () {
       .to.be.revertedWith("Vault: empty position")
   })
 
-  it("redeemUsdg", async () => {
+  it("redeemSgusd", async () => {
     await timelock.setContractHandler(user0.address, true)
 
-    await expect(timelock.connect(user0).redeemUsdg(vault.address, bnb.address, expandDecimals(1000, 18)))
+    await expect(timelock.connect(user0).redeemSgusd(vault.address, bnb.address, expandDecimals(1000, 18)))
       .to.be.revertedWith("Timelock: forbidden")
 
-    await expect(timelock.connect(wallet).redeemUsdg(vault.address, bnb.address, expandDecimals(1000, 18)))
+    await expect(timelock.connect(wallet).redeemSgusd(vault.address, bnb.address, expandDecimals(1000, 18)))
       .to.be.revertedWith("Timelock: action not signalled")
 
-    await expect(timelock.connect(user0).signalRedeemUsdg(vault.address, bnb.address, expandDecimals(1000, 18)))
+    await expect(timelock.connect(user0).signalRedeemSgusd(vault.address, bnb.address, expandDecimals(1000, 18)))
       .to.be.revertedWith("Timelock: forbidden")
 
-    await timelock.connect(wallet).signalRedeemUsdg(vault.address, bnb.address, expandDecimals(1000, 18))
+    await timelock.connect(wallet).signalRedeemSgusd(vault.address, bnb.address, expandDecimals(1000, 18))
 
-    await expect(timelock.connect(wallet).redeemUsdg(vault.address, bnb.address, expandDecimals(1000, 18)))
+    await expect(timelock.connect(wallet).redeemSgusd(vault.address, bnb.address, expandDecimals(1000, 18)))
       .to.be.revertedWith("Timelock: action time not yet passed")
 
     await increaseTime(provider, 5 * 24 * 60 * 60)
     await mineBlock(provider)
 
-    await expect(timelock.connect(wallet).redeemUsdg(vault.address, bnb.address, expandDecimals(1000, 18)))
+    await expect(timelock.connect(wallet).redeemSgusd(vault.address, bnb.address, expandDecimals(1000, 18)))
       .to.be.revertedWith("YieldToken: forbidden")
 
-    await usdg.setGov(timelock.address)
+    await sgusd.setGov(timelock.address)
 
-    await expect(timelock.connect(wallet).redeemUsdg(vault.address, bnb.address, expandDecimals(1000, 18)))
+    await expect(timelock.connect(wallet).redeemSgusd(vault.address, bnb.address, expandDecimals(1000, 18)))
       .to.be.revertedWith("Vault: _token not whitelisted")
 
     await timelock.connect(wallet).signalSetPriceFeed(vault.address, vaultPriceFeed.address)
@@ -1274,7 +1274,7 @@ describe("Timelock", function () {
       18, // _tokenDecimals
       7000, // _tokenWeight
       300, // _minProfitBps
-      expandDecimals(5000, 18), // _maxUsdgAmount
+      expandDecimals(5000, 18), // _maxSgusdAmount
       false, // _isStable
       true // isShortable
     )
@@ -1288,13 +1288,13 @@ describe("Timelock", function () {
       18, // _tokenDecimals
       7000, // _tokenWeight
       300, // _minProfitBps
-      expandDecimals(5000, 18), // _maxUsdgAmount
+      expandDecimals(5000, 18), // _maxSgusdAmount
       false, // _isStable
       true // isShortable
     )
 
     await bnb.mint(vault.address, expandDecimals(3, 18))
-    await vault.buyUSDG(bnb.address, user3.address)
+    await vault.buySGUSD(bnb.address, user3.address)
 
     await timelock.signalSetGov(vault.address, user1.address)
 
@@ -1306,7 +1306,7 @@ describe("Timelock", function () {
     await vault.connect(user1).setGov(timelock.address)
 
     expect(await bnb.balanceOf(mintReceiver.address)).eq(0)
-    await timelock.connect(wallet).redeemUsdg(vault.address, bnb.address, expandDecimals(1000, 18))
+    await timelock.connect(wallet).redeemSgusd(vault.address, bnb.address, expandDecimals(1000, 18))
     expect(await bnb.balanceOf(mintReceiver.address)).eq("1994000000000000000") // 1.994
   })
 })

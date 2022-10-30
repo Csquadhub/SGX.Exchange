@@ -9,6 +9,10 @@ async function main() {
     await sendTxn(reader.setConfig(true), "Reader.setConfig")
   }
 
+  if (network === "testnet") {
+    await sendTxn(reader.setConfig(true), "Reader.setConfig")
+  }
+
   writeTmpAddresses({
     reader: reader.address
   })

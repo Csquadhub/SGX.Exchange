@@ -94,6 +94,9 @@ a.btn {
   .connect-wallet .btn-image {
     display: none;
   }
+  .default-btn .btn-image {
+    display: none;
+  }
   .connect-wallet .btn-label {
     margin-left: 0px;
   }

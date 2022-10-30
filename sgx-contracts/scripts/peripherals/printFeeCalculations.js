@@ -23,7 +23,7 @@ async function getInfoTokens(vault, reader, tokens) {
 
     token.poolAmount = vaultTokenInfo[i * vaultPropsLength]
     token.reservedAmount = vaultTokenInfo[i * vaultPropsLength + 1]
-    token.usdgAmount = vaultTokenInfo[i * vaultPropsLength + 2]
+    token.sgusdAmount = vaultTokenInfo[i * vaultPropsLength + 2]
     token.redemptionAmount = vaultTokenInfo[i * vaultPropsLength + 3]
     token.weight = vaultTokenInfo[i * vaultPropsLength + 4]
     token.minPrice = vaultTokenInfo[i * vaultPropsLength + 5]

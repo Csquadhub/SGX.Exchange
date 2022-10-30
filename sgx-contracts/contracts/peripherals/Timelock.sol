@@ -13,7 +13,7 @@ import "../referrals/interfaces/IReferralStorage.sol";
 import "../tokens/interfaces/IYieldToken.sol";
 import "../tokens/interfaces/IBaseToken.sol";
 import "../tokens/interfaces/IMintable.sol";
-import "../tokens/interfaces/IUSDG.sol";
+import "../tokens/interfaces/ISGUSD.sol";
 import "../staking/interfaces/IVester.sol";
 
 import "../libraries/math/SafeMath.sol";
@@ -51,14 +51,14 @@ contract Timelock is ITimelock {
     event SignalSetGov(address target, address gov, bytes32 action);
     event SignalSetHandler(address target, address handler, bool isActive, bytes32 action);
     event SignalSetPriceFeed(address vault, address priceFeed, bytes32 action);
-    event SignalRedeemUsdg(address vault, address token, uint256 amount);
+    event SignalRedeemSgusd(address vault, address token, uint256 amount);
     event SignalVaultSetTokenConfig(
         address vault,
         address token,
         uint256 tokenDecimals,
         uint256 tokenWeight,
         uint256 minProfitBps,
-        uint256 maxUsdgAmount,
+        uint256 maxSgusdAmount,
         bool isStable,
         bool isShortable
     );
@@ -251,9 +251,9 @@ contract Timelock is ITimelock {
         address _token,
         uint256 _tokenWeight,
         uint256 _minProfitBps,
-        uint256 _maxUsdgAmount,
+        uint256 _maxSgusdAmount,
         uint256 _bufferAmount,
-        uint256 _usdgAmount
+        uint256 _sgusdAmount
     ) external onlyKeeperAndAbove {
         require(_minProfitBps <= 500, "Timelock: invalid _minProfitBps");
 
@@ -269,37 +269,37 @@ contract Timelock is ITimelock {
             tokenDecimals,
             _tokenWeight,
             _minProfitBps,
-            _maxUsdgAmount,
+            _maxSgusdAmount,
             isStable,
             isShortable
         );
 
         IVault(_vault).setBufferAmount(_token, _bufferAmount);
 
-        IVault(_vault).setUsdgAmount(_token, _usdgAmount);
+        IVault(_vault).setSgusdAmount(_token, _sgusdAmount);
     }
 
-    function setUsdgAmounts(address _vault, address[] memory _tokens, uint256[] memory _usdgAmounts) external onlyKeeperAndAbove {
+    function setSgusdAmounts(address _vault, address[] memory _tokens, uint256[] memory _sgusdAmounts) external onlyKeeperAndAbove {
         for (uint256 i = 0; i < _tokens.length; i++) {
-            IVault(_vault).setUsdgAmount(_tokens[i], _usdgAmounts[i]);
+            IVault(_vault).setSgusdAmount(_tokens[i], _sgusdAmounts[i]);
         }
     }
 
-    function updateUsdgSupply(uint256 usdgAmount) external onlyKeeperAndAbove {
-        address usdg = ISgxLpManager(sgxlpManager).usdg();
-        uint256 balance = IERC20(usdg).balanceOf(sgxlpManager);
+    function updateSgusdSupply(uint256 sgusdAmount) external onlyKeeperAndAbove {
+        address sgusd = ISgxLpManager(sgxlpManager).sgusd();
+        uint256 balance = IERC20(sgusd).balanceOf(sgxlpManager);
 
-        IUSDG(usdg).addVault(address(this));
+        ISGUSD(sgusd).addVault(address(this));
 
-        if (usdgAmount > balance) {
-            uint256 mintAmount = usdgAmount.sub(balance);
-            IUSDG(usdg).mint(sgxlpManager, mintAmount);
+        if (sgusdAmount > balance) {
+            uint256 mintAmount = sgusdAmount.sub(balance);
+            ISGUSD(sgusd).mint(sgxlpManager, mintAmount);
         } else {
-            uint256 burnAmount = balance.sub(usdgAmount);
-            IUSDG(usdg).burn(sgxlpManager, burnAmount);
+            uint256 burnAmount = balance.sub(sgusdAmount);
+            ISGUSD(sgusd).burn(sgxlpManager, burnAmount);
         }
 
-        IUSDG(usdg).removeVault(address(this));
+        ISGUSD(sgusd).removeVault(address(this));
     }
 
     function setMaxGlobalShortSize(address _vault, address _token, uint256 _amount) external onlyAdmin {
@@ -454,28 +454,28 @@ contract Timelock is ITimelock {
         IVault(_vault).setPriceFeed(_priceFeed);
     }
 
-    function signalRedeemUsdg(address _vault, address _token, uint256 _amount) external onlyAdmin {
-        bytes32 action = keccak256(abi.encodePacked("redeemUsdg", _vault, _token, _amount));
+    function signalRedeemSgusd(address _vault, address _token, uint256 _amount) external onlyAdmin {
+        bytes32 action = keccak256(abi.encodePacked("redeemSgusd", _vault, _token, _amount));
         _setPendingAction(action);
-        emit SignalRedeemUsdg(_vault, _token, _amount);
+        emit SignalRedeemSgusd(_vault, _token, _amount);
     }
 
-    function redeemUsdg(address _vault, address _token, uint256 _amount) external onlyAdmin {
-        bytes32 action = keccak256(abi.encodePacked("redeemUsdg", _vault, _token, _amount));
+    function redeemSgusd(address _vault, address _token, uint256 _amount) external onlyAdmin {
+        bytes32 action = keccak256(abi.encodePacked("redeemSgusd", _vault, _token, _amount));
         _validateAction(action);
         _clearAction(action);
 
-        address usdg = IVault(_vault).usdg();
+        address sgusd = IVault(_vault).sgusd();
         IVault(_vault).setManager(address(this), true);
-        IUSDG(usdg).addVault(address(this));
+        ISGUSD(sgusd).addVault(address(this));
 
-        IUSDG(usdg).mint(address(this), _amount);
-        IERC20(usdg).transfer(address(_vault), _amount);
+        ISGUSD(sgusd).mint(address(this), _amount);
+        IERC20(sgusd).transfer(address(_vault), _amount);
 
-        IVault(_vault).sellUSDG(_token, mintReceiver);
+        IVault(_vault).sellSGUSD(_token, mintReceiver);
 
         IVault(_vault).setManager(address(this), false);
-        IUSDG(usdg).removeVault(address(this));
+        ISGUSD(sgusd).removeVault(address(this));
     }
 
     function signalVaultSetTokenConfig(
@@ -484,7 +484,7 @@ contract Timelock is ITimelock {
         uint256 _tokenDecimals,
         uint256 _tokenWeight,
         uint256 _minProfitBps,
-        uint256 _maxUsdgAmount,
+        uint256 _maxSgusdAmount,
         bool _isStable,
         bool _isShortable
     ) external onlyAdmin {
@@ -495,7 +495,7 @@ contract Timelock is ITimelock {
             _tokenDecimals,
             _tokenWeight,
             _minProfitBps,
-            _maxUsdgAmount,
+            _maxSgusdAmount,
             _isStable,
             _isShortable
         ));
@@ -508,7 +508,7 @@ contract Timelock is ITimelock {
             _tokenDecimals,
             _tokenWeight,
             _minProfitBps,
-            _maxUsdgAmount,
+            _maxSgusdAmount,
             _isStable,
             _isShortable
         );
@@ -520,7 +520,7 @@ contract Timelock is ITimelock {
         uint256 _tokenDecimals,
         uint256 _tokenWeight,
         uint256 _minProfitBps,
-        uint256 _maxUsdgAmount,
+        uint256 _maxSgusdAmount,
         bool _isStable,
         bool _isShortable
     ) external onlyAdmin {
@@ -531,7 +531,7 @@ contract Timelock is ITimelock {
             _tokenDecimals,
             _tokenWeight,
             _minProfitBps,
-            _maxUsdgAmount,
+            _maxSgusdAmount,
             _isStable,
             _isShortable
         ));
@@ -544,7 +544,7 @@ contract Timelock is ITimelock {
             _tokenDecimals,
             _tokenWeight,
             _minProfitBps,
-            _maxUsdgAmount,
+            _maxSgusdAmount,
             _isStable,
             _isShortable
         );

@@ -7,7 +7,7 @@ import "../libraries/utils/ReentrancyGuard.sol";
 
 import "./interfaces/IVault.sol";
 import "./interfaces/ISgxLpManager.sol";
-import "../tokens/interfaces/IUSDG.sol";
+import "../tokens/interfaces/ISGUSD.sol";
 import "../tokens/interfaces/IMintable.sol";
 import "../access/Governable.sol";
 
@@ -18,11 +18,11 @@ contract SgxLpManager is ReentrancyGuard, Governable, ISgxLpManager {
     using SafeERC20 for IERC20;
 
     uint256 public constant PRICE_PRECISION = 10 ** 30;
-    uint256 public constant USDG_DECIMALS = 18;
+    uint256 public constant SGUSD_DECIMALS = 18;
     uint256 public constant MAX_COOLDOWN_DURATION = 48 hours;
 
     IVault public vault;
-    address public override usdg;
+    address public override sgusd;
     address public sgxlp;
 
     uint256 public override cooldownDuration;
@@ -38,9 +38,9 @@ contract SgxLpManager is ReentrancyGuard, Governable, ISgxLpManager {
         address account,
         address token,
         uint256 amount,
-        uint256 aumInUsdg,
+        uint256 aumInSgusd,
         uint256 sgxlpSupply,
-        uint256 usdgAmount,
+        uint256 sgusdAmount,
         uint256 mintAmount
     );
 
@@ -48,16 +48,16 @@ contract SgxLpManager is ReentrancyGuard, Governable, ISgxLpManager {
         address account,
         address token,
         uint256 sgxlpAmount,
-        uint256 aumInUsdg,
+        uint256 aumInSgusd,
         uint256 sgxlpSupply,
-        uint256 usdgAmount,
+        uint256 sgusdAmount,
         uint256 amountOut
     );
 
-    constructor(address _vault, address _usdg, address _sgxlp, uint256 _cooldownDuration) public {
+    constructor(address _vault, address _sgusd, address _sgxlp, uint256 _cooldownDuration) public {
         gov = msg.sender;
         vault = IVault(_vault);
-        usdg = _usdg;
+        sgusd = _sgusd;
         sgxlp = _sgxlp;
         cooldownDuration = _cooldownDuration;
     }
@@ -80,14 +80,14 @@ contract SgxLpManager is ReentrancyGuard, Governable, ISgxLpManager {
         aumDeduction = _aumDeduction;
     }
 
-    function addLiquidity(address _token, uint256 _amount, uint256 _minUsdg, uint256 _minSgxLp) external override nonReentrant returns (uint256) {
+    function addLiquidity(address _token, uint256 _amount, uint256 _minSgusd, uint256 _minSgxLp) external override nonReentrant returns (uint256) {
         if (inPrivateMode) { revert("SgxLpManager: action not enabled"); }
-        return _addLiquidity(msg.sender, msg.sender, _token, _amount, _minUsdg, _minSgxLp);
+        return _addLiquidity(msg.sender, msg.sender, _token, _amount, _minSgusd, _minSgxLp);
     }
 
-    function addLiquidityForAccount(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minUsdg, uint256 _minSgxLp) external override nonReentrant returns (uint256) {
+    function addLiquidityForAccount(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minSgusd, uint256 _minSgxLp) external override nonReentrant returns (uint256) {
         _validateHandler();
-        return _addLiquidity(_fundingAccount, _account, _token, _amount, _minUsdg, _minSgxLp);
+        return _addLiquidity(_fundingAccount, _account, _token, _amount, _minSgusd, _minSgxLp);
     }
 
     function removeLiquidity(address _tokenOut, uint256 _sgxlpAmount, uint256 _minOut, address _receiver) external override nonReentrant returns (uint256) {
@@ -107,9 +107,9 @@ contract SgxLpManager is ReentrancyGuard, Governable, ISgxLpManager {
         return amounts;
     }
 
-    function getAumInUsdg(bool maximise) public override view returns (uint256) {
+    function getAumInSgusd(bool maximise) public override view returns (uint256) {
         uint256 aum = getAum(maximise);
-        return aum.mul(10 ** USDG_DECIMALS).div(PRICE_PRECISION);
+        return aum.mul(10 ** SGUSD_DECIMALS).div(PRICE_PRECISION);
     }
 
     function getAum(bool maximise) public view returns (uint256) {
@@ -157,25 +157,25 @@ contract SgxLpManager is ReentrancyGuard, Governable, ISgxLpManager {
         return aumDeduction > aum ? 0 : aum.sub(aumDeduction);
     }
 
-    function _addLiquidity(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minUsdg, uint256 _minSgxLp) private returns (uint256) {
+    function _addLiquidity(address _fundingAccount, address _account, address _token, uint256 _amount, uint256 _minSgusd, uint256 _minSgxLp) private returns (uint256) {
         require(_amount > 0, "SgxLpManager: invalid _amount");
 
-        // calculate aum before buyUSDG
-        uint256 aumInUsdg = getAumInUsdg(true);
+        // calculate aum before buySGUSD
+        uint256 aumInSgusd = getAumInSgusd(true);
         uint256 sgxlpSupply = IERC20(sgxlp).totalSupply();
 
         IERC20(_token).safeTransferFrom(_fundingAccount, address(vault), _amount);
-        uint256 usdgAmount = vault.buyUSDG(_token, address(this));
-        require(usdgAmount >= _minUsdg, "SgxLpManager: insufficient USDG output");
+        uint256 sgusdAmount = vault.buySGUSD(_token, address(this));
+        require(sgusdAmount >= _minSgusd, "SgxLpManager: insufficient SGUSD output");
 
-        uint256 mintAmount = aumInUsdg == 0 ? usdgAmount : usdgAmount.mul(sgxlpSupply).div(aumInUsdg);
+        uint256 mintAmount = aumInSgusd == 0 ? sgusdAmount : sgusdAmount.mul(sgxlpSupply).div(aumInSgusd);
         require(mintAmount >= _minSgxLp, "SgxLpManager: insufficient SGXLP output");
 
         IMintable(sgxlp).mint(_account, mintAmount);
 
         lastAddedAt[_account] = block.timestamp;
 
-        emit AddLiquidity(_account, _token, _amount, aumInUsdg, sgxlpSupply, usdgAmount, mintAmount);
+        emit AddLiquidity(_account, _token, _amount, aumInSgusd, sgxlpSupply, sgusdAmount, mintAmount);
 
         return mintAmount;
     }
@@ -184,23 +184,23 @@ contract SgxLpManager is ReentrancyGuard, Governable, ISgxLpManager {
         require(_sgxlpAmount > 0, "SgxLpManager: invalid _sgxlpAmount");
         require(lastAddedAt[_account].add(cooldownDuration) <= block.timestamp, "SgxLpManager: cooldown duration not yet passed");
 
-        // calculate aum before sellUSDG
-        uint256 aumInUsdg = getAumInUsdg(false);
+        // calculate aum before sellSGUSD
+        uint256 aumInSgusd = getAumInSgusd(false);
         uint256 sgxlpSupply = IERC20(sgxlp).totalSupply();
 
-        uint256 usdgAmount = _sgxlpAmount.mul(aumInUsdg).div(sgxlpSupply);
-        uint256 usdgBalance = IERC20(usdg).balanceOf(address(this));
-        if (usdgAmount > usdgBalance) {
-            IUSDG(usdg).mint(address(this), usdgAmount.sub(usdgBalance));
+        uint256 sgusdAmount = _sgxlpAmount.mul(aumInSgusd).div(sgxlpSupply);
+        uint256 sgusdBalance = IERC20(sgusd).balanceOf(address(this));
+        if (sgusdAmount > sgusdBalance) {
+            ISGUSD(sgusd).mint(address(this), sgusdAmount.sub(sgusdBalance));
         }
 
         IMintable(sgxlp).burn(_account, _sgxlpAmount);
 
-        IERC20(usdg).transfer(address(vault), usdgAmount);
-        uint256 amountOut = vault.sellUSDG(_tokenOut, _receiver);
+        IERC20(sgusd).transfer(address(vault), sgusdAmount);
+        uint256 amountOut = vault.sellSGUSD(_tokenOut, _receiver);
         require(amountOut >= _minOut, "SgxLpManager: insufficient output");
 
-        emit RemoveLiquidity(_account, _tokenOut, _sgxlpAmount, aumInUsdg, sgxlpSupply, usdgAmount, amountOut);
+        emit RemoveLiquidity(_account, _tokenOut, _sgxlpAmount, aumInSgusd, sgxlpSupply, sgusdAmount, amountOut);
 
         return amountOut;
     }

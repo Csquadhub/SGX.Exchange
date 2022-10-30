@@ -53,8 +53,8 @@ describe("FastPriceFeed", function () {
       500, // maxMarginFeeBasisPoints 5%
     ])
 
-    usdg = await deployContract("USDG", [vault.address])
-    router = await deployContract("Router", [vault.address, usdg.address, bnb.address])
+    sgusd = await deployContract("SGUSD", [vault.address])
+    router = await deployContract("Router", [vault.address, sgusd.address, bnb.address])
     positionRouter = await deployContract("PositionRouter", [vault.address, router.address, bnb.address, depositFee, minExecutionFee])
 
     fastPriceEvents = await deployContract("FastPriceEvents", [])

@@ -22,7 +22,7 @@ async function printToken(token, label) {
   console.log(label, "gov", await token.gov())
 }
 
-async function printUsdg(token, label) {
+async function printSgusd(token, label) {
   console.log(label, "isVault", await token.vaults(wallet.address))
   console.log(label, "gov", await token.gov())
 }
@@ -63,13 +63,13 @@ async function main() {
   await printRewardTracker(feeSgxLpTracker, "feeSgxLpTracker")
 
   const sgxlp = await contractAt("MintableBaseToken", "0x01234181085565ed162a948b6a5e88758CD7c7b8")
-  const usdg = await contractAt("USDG", "0xc0253c3cC6aa5Ab407b5795a04c28fB063273894")
+  const sgusd = await contractAt("SGUSD", "0xc0253c3cC6aa5Ab407b5795a04c28fB063273894")
   // const sgx = await contractAt("MintableBaseToken", "0x62edc0692BD897D2295872a9FFCac5425011c661")
   // const esSgx = await contractAt("MintableBaseToken", "0xFf1489227BbAAC61a9209A08929E4c2a526DdD17")
   const bnSgx = await contractAt("MintableBaseToken", "0x8087a341D32D445d9aC8aCc9c14F5781E04A26d2")
 
   await printToken(sgxlp, "sgxlp")
-  await printUsdg(usdg, "usdg")
+  await printSgusd(sgusd, "sgusd")
   // await printToken(sgx, "sgx")
   // await printToken(esSgx, "esSgx")
   await printToken(bnSgx, "bnSgx")
@@ -100,7 +100,7 @@ async function main() {
   await updateRewardTrackerGov(feeSgxLpTracker, "feeSgxLpTracker")
 
   await updateGov(sgxlp, "sgxlp")
-  await updateGov(usdg, "usdg")
+  await updateGov(sgusd, "sgusd")
   // await updateGov(sgx, "sgx")
   // await updateGov(esSgx, "esSgx")
   await updateGov(bnSgx, "bnSgx")

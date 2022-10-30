@@ -520,14 +520,9 @@ export default function DashboardV2() {
             <div className="Page-title">
               <Trans>Stats</Trans>
             </div>
+            <div className="Page-title-divider"></div>
             <div className="Page-description">
-              <Trans>
-                Total Stats start from {totalStatsStartDate}.<br /> For detailed stats:{" "}
-              </Trans>
-              <a href="https://stats.sgx.io" target="_blank" rel="noopener noreferrer">
-                https://stats.sgx.io
-              </a>
-              .
+              <Trans>Total Stats start from {totalStatsStartDate}.</Trans>
             </div>
           </div>
         </div>
@@ -535,9 +530,8 @@ export default function DashboardV2() {
           <div className="DashboardV2-cards">
             <div className="App-card">
               <div className="App-card-title">
-                <Trans>Overview</Trans>
+                <Trans>OVERVIEW</Trans>
               </div>
-              <div className="App-card-divider"></div>
               <div className="App-card-content">
                 <div className="App-card-row">
                   <div className="label">AUM</div>
@@ -659,9 +653,8 @@ export default function DashboardV2() {
             </div>
             <div className="App-card">
               <div className="App-card-title">
-                <Trans>Total Stats</Trans>
+                <Trans>TOTAL STATS</Trans>
               </div>
-              <div className="App-card-divider"></div>
               <div className="App-card-content">
                 <div className="App-card-row">
                   <div className="label">
@@ -714,9 +707,8 @@ export default function DashboardV2() {
             </div>
           </div>
           <div className="Tab-title-section">
-            <div className="Page-title">
-              Tokens
-            </div>
+            <div className="Page-title">Tokens</div>
+            <div className="Page-title-divider"></div>
             <div className="Page-description">
               <Trans>Platform and SGXLP index tokens.</Trans>
             </div>
@@ -727,12 +719,9 @@ export default function DashboardV2() {
                 <div className="stats-block">
                   <div className="App-card-title">
                     <div className="App-card-title-mark">
-                      <div className="App-card-title-mark-icon">
-                        Overview (SGX)
-                      </div>
+                      <div className="App-card-title-mark-icon">SGX</div>
                     </div>
                   </div>
-                  <div className="App-card-divider"></div>
                   <div className="App-card-content">
                     <div className="App-card-row">
                       <div className="label">Price</div>
@@ -799,17 +788,17 @@ export default function DashboardV2() {
                 </div>
                 <div className="stats-piechart" onMouseLeave={onSGXDistributionChartLeave}>
                   {gmxDistributionData.length > 0 && (
-                    <PieChart width={210} height={210}>
+                    <PieChart width={210} height={160}>
                       <Pie
                         data={gmxDistributionData}
                         cx={100}
-                        cy={100}
+                        cy={120}
                         innerRadius={73}
                         outerRadius={80}
                         fill="#F04D36"
                         dataKey="value"
-                        startAngle={90}
-                        endAngle={-270}
+                        startAngle={0}
+                        endAngle={180}
                         paddingAngle={2}
                         onMouseEnter={onSGXDistributionChartEnter}
                         onMouseOut={onSGXDistributionChartLeave}
@@ -831,7 +820,7 @@ export default function DashboardV2() {
                           />
                         ))}
                       </Pie>
-                      <text x={"50%"} y={"50%"} fill="white" textAnchor="middle" dominantBaseline="middle">
+                      <text x={"50%"} y={"70%"} fill="white" textAnchor="middle" dominantBaseline="middle">
                         <Trans>Distribution</Trans>
                       </text>
                       <Tooltip content={<CustomTooltip />} />
@@ -843,12 +832,9 @@ export default function DashboardV2() {
                 <div className="stats-block">
                   <div className="App-card-title">
                     <div className="App-card-title-mark">
-                      <div className="App-card-title-mark-icon">
-                        Overview (SGXLP)
-                      </div>
+                      <div className="App-card-title-mark-icon">SGXLP</div>
                     </div>
                   </div>
-                  <div className="App-card-divider"></div>
                   <div className="App-card-content">
                     <div className="App-card-row">
                       <div className="label">
@@ -884,17 +870,17 @@ export default function DashboardV2() {
                 </div>
                 <div className="stats-piechart" onMouseOut={onSGXLPPoolChartLeave}>
                   {glpPool.length > 0 && (
-                    <PieChart width={210} height={210}>
+                    <PieChart width={210} height={160}>
                       <Pie
                         data={glpPool}
                         cx={100}
-                        cy={100}
+                        cy={120}
                         innerRadius={73}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-                        startAngle={90}
-                        endAngle={-270}
+                        startAngle={0}
+                        endAngle={180}
                         onMouseEnter={onSGXLPPoolChartEnter}
                         onMouseOut={onSGXLPPoolChartLeave}
                         onMouseLeave={onSGXLPPoolChartLeave}
@@ -916,7 +902,7 @@ export default function DashboardV2() {
                           />
                         ))}
                       </Pie>
-                      <text x={"50%"} y={"50%"} fill="white" textAnchor="middle" dominantBaseline="middle">
+                      <text x={"50%"} y={"70%"} fill="white" textAnchor="middle" dominantBaseline="middle">
                         SGXLP Pool
                       </text>
                       <Tooltip content={<CustomTooltip />} />
@@ -927,9 +913,8 @@ export default function DashboardV2() {
             </div>
             <div className="token-table-wrapper App-card">
               <div className="App-card-title">
-                <Trans>SGXLP Index Composition</Trans>{" "}
+                <Trans>SGXLP INDEX COMPOSITION</Trans>{" "}
               </div>
-              <div className="App-card-divider"></div>
               <table className="token-table">
                 <thead>
                   <tr>

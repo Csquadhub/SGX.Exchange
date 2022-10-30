@@ -25,6 +25,17 @@ async function getAvaxValues() {
   return { vault, tokenManager, sgxlpManager, positionRouter, positionManager }
 }
 
+async function getBscTestnetValues() {
+  const vault = await contractAt("Vault", "0xEFF4b7FdC9ee22387a6183B814f2467007C065b2")
+  const tokenManager = { address: "0xC734E9c50158Ab7513E1fa9d236fB4A91923e255" }
+  const sgxlpManager = { address: "0xD11D58C3912736e045Bb1ec300A4c5765b95f347" }
+
+  const positionRouter = { address: "0x5Fb6a4B08E893E56640971f2646Bc7f2E5fB42DA" }
+  const positionManager = { address: "0x0639859E49D8Fe28447cc47F4F286Eb47462fc34" }
+
+  return { vault, tokenManager, sgxlpManager, positionRouter, positionManager }
+}
+
 async function getValues() {
   if (network === "arbitrum") {
     return getArbValues()
@@ -33,12 +44,14 @@ async function getValues() {
   if (network === "avax") {
     return getAvaxValues()
   }
+
+  if (network === "testnet") {
+    return getBscTestnetValues()
+  }
 }
 
 async function main() {
-  const signer = await getFrameSigner()
-
-  const admin = "0x49B373D422BdA4C6BfCdd5eC1E48A9a26fdA2F8b"
+  const admin = "0x8e338d2246085CaD626603beFc82672fa7A9C025"
   const buffer = 24 * 60 * 60
   const maxTokenSupply = expandDecimals("13250000", 18)
 
@@ -56,24 +69,20 @@ async function main() {
     100 // maxMarginFeeBasisPoints 1%
   ], "Timelock")
 
-  const deployedTimelock = await contractAt("Timelock", timelock.address, signer)
+  const deployedTimelock = await contractAt("Timelock", timelock.address)
 
   await sendTxn(deployedTimelock.setShouldToggleIsLeverageEnabled(true), "deployedTimelock.setShouldToggleIsLeverageEnabled(true)")
   await sendTxn(deployedTimelock.setContractHandler(positionRouter.address, true), "deployedTimelock.setContractHandler(positionRouter)")
   await sendTxn(deployedTimelock.setContractHandler(positionManager.address, true), "deployedTimelock.setContractHandler(positionManager)")
 
   // // update gov of vault
-  const vaultGov = await contractAt("Timelock", await vault.gov(), signer)
+  const vaultGov = await contractAt("Timelock", await vault.gov())
 
   await sendTxn(vaultGov.signalSetGov(vault.address, deployedTimelock.address), "vaultGov.signalSetGov")
   await sendTxn(deployedTimelock.signalSetGov(vault.address, vaultGov.address), "deployedTimelock.signalSetGov(vault)")
 
   const signers = [
-    "0x82429089e7c86B7047b793A9E7E7311C93d2b7a6", // coinflipcanada
-    "0xD7941C4Ca57a511F21853Bbc7FBF8149d5eCb398", // G
-    "0xfb481D70f8d987c1AE3ADc90B7046e39eb6Ad64B", // kr
-    "0x99Aa3D1b3259039E8cB4f0B33d0Cfd736e1Bf49E", // quat
-    "0x6091646D0354b03DD1e9697D33A7341d8C93a6F5" // xhiroz
+    "0x8e338d2246085CaD626603beFc82672fa7A9C025",
   ]
 
   for (let i = 0; i < signers.length; i++) {
@@ -82,7 +91,7 @@ async function main() {
   }
 
   const keepers = [
-    "0x5F799f365Fa8A2B60ac0429C48B153cA5a6f0Cf8" // X
+    "0x8e338d2246085CaD626603beFc82672fa7A9C025" // X
   ]
 
   for (let i = 0; i < keepers.length; i++) {

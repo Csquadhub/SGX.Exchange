@@ -75,20 +75,20 @@ describe("OrderBook, increase position orders", function () {
         busdPriceFeed = await deployContract("PriceFeed", [])
 
         vault = await deployContract("Vault", [])
-        usdg = await deployContract("USDG", [vault.address])
-        router = await deployContract("Router", [vault.address, usdg.address, bnb.address])
+        sgusd = await deployContract("SGUSD", [vault.address])
+        router = await deployContract("Router", [vault.address, sgusd.address, bnb.address])
         vaultPriceFeed = await deployContract("VaultPriceFeed", [])
 
-        const initVaultResult = await initVault(vault, router, usdg, vaultPriceFeed)
+        const initVaultResult = await initVault(vault, router, sgusd, vaultPriceFeed)
 
         distributor0 = await deployContract("TimeDistributor", [])
-        yieldTracker0 = await deployContract("YieldTracker", [usdg.address])
+        yieldTracker0 = await deployContract("YieldTracker", [sgusd.address])
 
         await yieldTracker0.setDistributor(distributor0.address)
         await distributor0.setDistribution([yieldTracker0.address], [1000], [bnb.address])
 
         await bnb.mint(distributor0.address, 5000)
-        await usdg.setYieldTrackers([yieldTracker0.address])
+        await sgusd.setYieldTrackers([yieldTracker0.address])
 
         reader = await deployContract("Reader", [])
 
@@ -119,7 +119,7 @@ describe("OrderBook, increase position orders", function () {
             router.address,
             vault.address,
             bnb.address,
-            usdg.address,
+            sgusd.address,
             minExecutionFee,
             expandDecimals(5, 30) // minPurchseTokenAmountUsd
         );

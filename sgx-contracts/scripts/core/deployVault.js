@@ -11,9 +11,9 @@ async function main() {
 
   const vault = await deployContract("Vault", [])
   // const vault = await contractAt("Vault", "0x489ee077994B6658eAfA855C308275EAd8097C4A")
-  const usdg = await deployContract("USDG", [vault.address])
-  // const usdg = await contractAt("USDG", "0x45096e7aA921f27590f8F19e457794EB09678141")
-  const router = await deployContract("Router", [vault.address, usdg.address, nativeToken.address])
+  const sgusd = await deployContract("SGUSD", [vault.address])
+  // const sgusd = await contractAt("SGUSD", "0x45096e7aA921f27590f8F19e457794EB09678141")
+  const router = await deployContract("Router", [vault.address, sgusd.address, nativeToken.address])
   // const router = await contractAt("Router", "0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064")
   // const vaultPriceFeed = await contractAt("VaultPriceFeed", "0x30333ce00ac3025276927672aaefd80f22e89e54")
   // const secondaryPriceFeed = await deployContract("FastPriceFeed", [5 * 60])
@@ -27,15 +27,15 @@ async function main() {
   const sgxlp = await deployContract("SGXLP", [])
   await sendTxn(sgxlp.setInPrivateTransferMode(true), "sgxlp.setInPrivateTransferMode")
   // const sgxlp = await contractAt("SGXLP", "0x4277f8F2c384827B5273592FF7CeBd9f2C1ac258")
-  const sgxlpManager = await deployContract("SgxLpManager", [vault.address, usdg.address, sgxlp.address, 15 * 60])
+  const sgxlpManager = await deployContract("SgxLpManager", [vault.address, sgusd.address, sgxlp.address, 15 * 60])
   await sendTxn(sgxlpManager.setInPrivateMode(true), "sgxlpManager.setInPrivateMode")
 
   await sendTxn(sgxlp.setMinter(sgxlpManager.address, true), "sgxlp.setMinter")
-  await sendTxn(usdg.addVault(sgxlpManager.address), "usdg.addVault(sgxlpManager)")
+  await sendTxn(sgusd.addVault(sgxlpManager.address), "sgusd.addVault(sgxlpManager)")
 
   await sendTxn(vault.initialize(
     router.address, // router
-    usdg.address, // usdg
+    sgusd.address, // sgusd
     vaultPriceFeed.address, // priceFeed
     toUsd(2), // liquidationFeeUsd
     100, // fundingRateFactor

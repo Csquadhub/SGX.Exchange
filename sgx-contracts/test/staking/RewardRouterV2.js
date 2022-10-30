@@ -19,7 +19,7 @@ describe("RewardRouterV2", function () {
   let vault
   let sgxlpManager
   let sgxlp
-  let usdg
+  let sgusd
   let router
   let vaultPriceFeed
   let bnb
@@ -71,13 +71,13 @@ describe("RewardRouterV2", function () {
     busdPriceFeed = await deployContract("PriceFeed", [])
 
     vault = await deployContract("Vault", [])
-    usdg = await deployContract("USDG", [vault.address])
-    router = await deployContract("Router", [vault.address, usdg.address, bnb.address])
+    sgusd = await deployContract("SGUSD", [vault.address])
+    router = await deployContract("Router", [vault.address, sgusd.address, bnb.address])
     vaultPriceFeed = await deployContract("VaultPriceFeed", [])
     sgxlp = await deployContract("SGXLP", [])
 
-    await initVault(vault, router, usdg, vaultPriceFeed)
-    sgxlpManager = await deployContract("SgxLpManager", [vault.address, usdg.address, sgxlp.address, 24 * 60 * 60])
+    await initVault(vault, router, sgusd, vaultPriceFeed)
+    sgxlpManager = await deployContract("SgxLpManager", [vault.address, sgusd.address, sgxlp.address, 24 * 60 * 60])
 
     timelock = await deployContract("Timelock", [
       wallet.address,
@@ -626,7 +626,7 @@ describe("RewardRouterV2", function () {
       .to.be.revertedWith("RewardRouter: invalid msg.value")
 
     await expect(rewardRouter.connect(user0).mintAndStakeSgxLpETH(expandDecimals(300, 18), expandDecimals(300, 18), { value: expandDecimals(1, 18) }))
-      .to.be.revertedWith("SgxLpManager: insufficient USDG output")
+      .to.be.revertedWith("SgxLpManager: insufficient SGUSD output")
 
     await expect(rewardRouter.connect(user0).mintAndStakeSgxLpETH(expandDecimals(299, 18), expandDecimals(300, 18), { value: expandDecimals(1, 18) }))
       .to.be.revertedWith("SgxLpManager: insufficient SGXLP output")
@@ -1553,7 +1553,7 @@ describe("RewardRouterV2", function () {
 
     expect(await bnb.balanceOf(user1.address)).eq("830833333333333333")
 
-    await usdg.addVault(sgxlpManager.address)
+    await sgusd.addVault(sgxlpManager.address)
 
     expect(await bnb.balanceOf(user3.address)).eq("0")
 
