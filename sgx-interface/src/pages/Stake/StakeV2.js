@@ -1440,6 +1440,7 @@ export default function StakeV2({ setPendingTxns, connectWallet }) {
           <div className="Page-title">
             <Trans>Earn</Trans>
           </div>
+          <div className="Page-title-divider"></div>
           <div className="Page-description">
             <Trans>
               Stake{" "}
@@ -2015,11 +2016,10 @@ export default function StakeV2({ setPendingTxns, connectWallet }) {
       <div>
         <div className="Tab-title-section">
           <div className="Page-title">Vest</div>
+          <div className="Page-title-divider"></div>
           <div className="Page-description">
             <Trans>
-              Convert esSGX tokens to SGX tokens.
-              <br />
-              Please read the{" "}
+              Convert esSGX tokens to SGX tokens. Please read the{" "}
               <a href="https://gmxio.gitbook.io/gmx/rewards#vesting" target="_blank" rel="noopener noreferrer">
                 vesting details
               </a>{" "}

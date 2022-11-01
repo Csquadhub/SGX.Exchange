@@ -120,6 +120,7 @@ function Referrals({ connectWallet, setPendingTxns, pendingTxns }) {
             <div className="Page-title">
               <Trans>Referrals</Trans>
             </div>
+            <div className="Page-title-divider"></div>
             <div className="Page-description">
               <Trans>
                 Get fee discounts and earn rebates through the SGX referral program.

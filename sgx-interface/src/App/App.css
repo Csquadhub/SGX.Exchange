@@ -663,9 +663,16 @@ button.App-connect-wallet:hover {
 
 .App-header-container-left .a.active,
 .App-header-container-left a.active {
-  border-bottom: 2px solid #ef4d36;
+  background: linear-gradient(to right, rgba(255, 136, 0), rgba(255, 57, 36));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
+.App-header-container-left .a.active::before,
+.App-header-container-left a.active::before {
+  content: "● ";
+}
 .Toastify {
   font-size: 1.4rem;
 }
@@ -809,7 +816,7 @@ a.App-cta,
 button.App-cta {
   color: white;
   text-decoration: none;
-  background: #f04d36;
+  background: linear-gradient(to right, rgba(255, 136, 0), rgba(255, 57, 36));
 }
 
 a.App-cta:hover,
@@ -860,7 +867,7 @@ button.App-button-option {
   display: inline-flex !important;
   align-items: center;
   border: none;
-  background: #f04d36;
+  background: linear-gradient(to right, rgba(255, 136, 0), rgba(255, 57, 36));
 }
 
 a.App-button-option:hover,
@@ -956,7 +963,7 @@ a.App-social-link {
   margin-right: 1.1rem;
   font-size: 2.635rem;
   color: white;
-  background-color: #1D1D2B;
+  background-color: #1d1d2b;
   border-radius: 1rem;
   /* opacity: 0.8; */
 }

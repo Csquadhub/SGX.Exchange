@@ -373,6 +373,7 @@ export default function Ecosystem() {
               <div className="Page-title">
                 <Trans>SGX Pages</Trans>
               </div>
+              <div className="Page-title-divider"></div>
               <div className="Page-description">
                 <Trans>SGX ecosystem pages.</Trans>
               </div>
@@ -413,6 +414,7 @@ export default function Ecosystem() {
             <div className="Page-title">
               <Trans>Community Projects</Trans>
             </div>
+            <div className="Page-title-divider"></div>
             <div className="Page-description">
               <Trans>Projects developed by the SGX community.</Trans>
             </div>
@@ -462,6 +464,7 @@ export default function Ecosystem() {
             <div className="Page-title">
               <Trans>Dashboards</Trans>
             </div>
+            <div className="Page-title-divider"></div>
             <div className="Page-description">
               <Trans>SGX dashboards and analytics.</Trans>
             </div>
@@ -512,6 +515,7 @@ export default function Ecosystem() {
             <div className="Page-title">
               <Trans>Partnerships and Integrations</Trans>
             </div>
+            <div className="Page-title-divider"></div>
             <div className="Page-description">
               <Trans>Projects integrated with SGX.</Trans>
             </div>
@@ -561,6 +565,7 @@ export default function Ecosystem() {
             <div className="Page-title">
               <Trans>Telegram Groups</Trans>
             </div>
+            <div className="Page-title-divider"></div>
             <div className="Page-description">
               <Trans>Community-led Telegram groups.</Trans>
             </div>

@@ -172,7 +172,15 @@
 
 .App-header-container-left .a.active,
 .App-header-container-left a.active {
-  border-bottom: 2px solid #EF4D36;
+  background: linear-gradient(to right, rgba(255, 136, 0), rgba(255, 57, 36));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.App-header-container-left .a.active::before,
+.App-header-container-left a.active::before {
+  content: "● ";
 }
 
 .App-header-container-right {
